@@ -203,6 +203,7 @@ int2048 &int2048::operator*=(const int2048 &other) {
     std::vector<long long> res_digits(n + m, 0);
     for (size_t i = 0; i < n; ++i) {
         long long d_i = digits[i];
+        if (d_i == 0) continue;
         for (size_t j = 0; j < m; ++j) {
             res_digits[i + j] += d_i * other.digits[j];
             if (res_digits[i + j] >= 8e18) {
@@ -233,18 +234,19 @@ int2048 int2048::div_abs(const int2048 &other, int2048 &rem) const {
     int2048 q, r;
     r.digits.clear();
     r.neg = false;
-    
+    q.digits.clear();
+
     for (int i = (int)digits.size() - 1; i >= 0; --i) {
-        if (!(r.digits.size() == 1 && r.digits[0] == 0)) {
-            r.digits.insert(r.digits.begin(), digits[i]);
-        } else {
+        if (r.digits.size() == 1 && r.digits[0] == 0) {
             r.digits[0] = digits[i];
+        } else {
+            r.digits.insert(r.digits.begin(), digits[i]);
         }
         r.trim();
         
         long long low = 0, high = BASE - 1, best = 0;
         while (low <= high) {
-            long long mid = (low + high) / 2;
+            long long mid = low + (high - low) / 2;
             int2048 temp(mid);
             temp *= other;
             if (r.compare_abs(temp) >= 0) {
